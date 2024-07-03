@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat App</title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+  <div id="main">
+    <div id="sender">
+      <input type="text" placeholder="Send message" id="messageInput">
+      <button id="btn">Send</button>
+    </div>
+    <div style="background-color: #9999;" id="display"></div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const input = document.getElementById('messageInput');
+    const sendButton = document.getElementById('btn');
+
+    function sendMessage() {
+      if (input.value.trim()) {
+        send(input.value);
+      }
+    }
+
+    sendButton.addEventListener("click", sendMessage);
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    function send(msg) {
+      const sendMessageHtml = `
+        <div id="send">
+          <h2>${msg}</h2>
+        </div>`;
+      document.querySelector("#display").innerHTML += sendMessageHtml;
+      socket.emit("msg", { msg });
+      input.value = '';
+      input.focus();
+    }
+
+    function receive(msg) {
+      const receiveMessageHtml = `
+        <div id="rec">
+          <h2>${msg}</h2>
+        </div>`;
+      document.querySelector("#display").innerHTML += receiveMessageHtml;
+    }
+
+    socket.on("recmsg", (data) => {
+      receive(data.msg);
+    });
+  </script>
+</body>
+</html>
